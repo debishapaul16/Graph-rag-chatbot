@@ -1,6 +1,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
-
+import chromadb
 # ==================================================
 # STEP 1 : READ DOCUMENT
 # ==================================================
@@ -85,3 +85,58 @@ for i in range(len(chunks)):
     print(embeddings[i][:5])
 
     print("-" * 50)
+# ==================================================
+# STEP 7 : CONNECT TO CHROMADB
+# ==================================================
+
+print("\n" + "=" * 50)
+print("CONNECTING TO CHROMADB")
+print("=" * 50)
+
+client = chromadb.PersistentClient(path="./chroma_db")
+
+collection = client.get_or_create_collection(
+    name="documents"
+)
+
+print("ChromaDB Connected Successfully")
+print("Collection Ready")
+
+# ==================================================
+# STEP 8 : STORE CHUNKS AND EMBEDDINGS
+# ==================================================
+
+print("\nStoring Data in ChromaDB...")
+
+for i, chunk in enumerate(chunks):
+
+    collection.add(
+        ids=[f"chunk_{i}"],
+        documents=[chunk],
+        embeddings=[embeddings[i].tolist()]
+    )
+
+print("All Chunks Stored Successfully")
+
+# ==================================================
+# STEP 9 : VERIFY STORAGE
+# ==================================================
+
+print("\n" + "=" * 50)
+print("VERIFYING CHROMADB STORAGE")
+print("=" * 50)
+
+print(f"Total Records Stored: {collection.count()}")
+
+# Fetch first few records
+
+results = collection.get()
+
+print("\nStored IDs:")
+print(results["ids"])
+
+print("\nStored Documents:")
+
+for doc in results["documents"]:
+    print("-" * 30)
+    print(doc)
