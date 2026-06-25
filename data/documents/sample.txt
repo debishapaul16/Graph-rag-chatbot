@@ -1,0 +1,9 @@
+Artificial Intelligence is a branch of Computer Science.
+
+Machine Learning is a subset of Artificial Intelligence.
+
+Deep Learning is a subset of Machine Learning.
+
+Neo4j is a graph database.
+
+GraphRAG combines graph databases and large language models.
