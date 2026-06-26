@@ -2,10 +2,10 @@
 # IMPORT LIBRARIES
 # ==========================================================
 
-from langchain_ollama import OllamaLLM
-from neo4j import GraphDatabase
-from sentence_transformers import SentenceTransformer
-import chromadb
+from config import llm
+from config import embedding_model
+from config import driver
+from config import collection
 
 
 # ==========================================================
