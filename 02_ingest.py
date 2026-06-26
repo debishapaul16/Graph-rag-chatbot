@@ -8,7 +8,7 @@ import chromadb
 with open("data/documents/sample.txt", "r", encoding="utf-8") as file:
     text = file.read()
 
-print("=" * 50)
+print("==" * 50)
 print("ORIGINAL DOCUMENT")
 print("=" * 50)
 print(text)
