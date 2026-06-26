@@ -7,88 +7,102 @@ from neo4j import GraphDatabase
 from sentence_transformers import SentenceTransformer
 import chromadb
 
-# ==========================================================
-# STEP 1 : LOAD GEMMA MODEL
-# ==========================================================
-
-print("Loading Gemma...")
-
-llm = OllamaLLM(model="gemma3")
-
-print("Gemma Loaded Successfully")
 
 # ==========================================================
-# STEP 2 : CONNECT TO NEO4J
+# HYBRID SEARCH FUNCTION
 # ==========================================================
 
-URI = "bolt://172.26.0.1:7687"
-USERNAME = "neo4j"
-PASSWORD = "debishapaul16"
+def hybrid_search():
 
-driver = GraphDatabase.driver(
-    URI,
-    auth=(USERNAME, PASSWORD)
-)
+    # ==========================================================
+    # STEP 1 : LOAD GEMMA MODEL
+    # ==========================================================
 
-print("Connected To Neo4j")
+    print("Loading Gemma...")
 
-# ==========================================================
-# STEP 3 : LOAD EMBEDDING MODEL
-# ==========================================================
+    llm = OllamaLLM(model="gemma3")
 
-print("Loading Embedding Model...")
+    print("Gemma Loaded Successfully")
 
-embedding_model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
 
-print("Embedding Model Loaded")
+    # ==========================================================
+    # STEP 2 : CONNECT TO NEO4J
+    # ==========================================================
 
-# ==========================================================
-# STEP 4 : CONNECT TO CHROMADB
-# ==========================================================
+    URI = "bolt://172.26.0.1:7687"
+    USERNAME = "neo4j"
+    PASSWORD = "debishapaul16"
 
-client = chromadb.PersistentClient(path="chroma_db")
+    driver = GraphDatabase.driver(
+        URI,
+        auth=(USERNAME, PASSWORD)
+    )
 
-collection = client.get_collection("documents")
+    print("Connected To Neo4j")
 
-print("Connected To ChromaDB")
 
-# ==========================================================
-# STEP 5 : TAKE USER QUESTION
-# ==========================================================
+    # ==========================================================
+    # STEP 3 : LOAD EMBEDDING MODEL
+    # ==========================================================
 
-print()
+    print("Loading Embedding Model...")
 
-question = input("Ask your question : ")
+    embedding_model = SentenceTransformer(
+        "all-MiniLM-L6-v2"
+    )
 
-# ==========================================================
-# STEP 6 : EXTRACT ENTITY USING GEMMA
-# ==========================================================
+    print("Embedding Model Loaded")
 
-prompt = f"""
+
+    # ==========================================================
+    # STEP 4 : CONNECT TO CHROMADB
+    # ==========================================================
+
+    client = chromadb.PersistentClient(path="chroma_db")
+
+    collection = client.get_collection("documents")
+
+    print("Connected To ChromaDB")
+
+
+    # ==========================================================
+    # STEP 5 : TAKE USER QUESTION
+    # ==========================================================
+
+    print()
+
+    question = input("Ask your question : ")
+
+
+    # ==========================================================
+    # STEP 6 : EXTRACT ENTITY USING GEMMA
+    # ==========================================================
+
+    prompt = f"""
 Extract the main entity from the question.
 
 Question:
 {question}
 
 Return ONLY the entity.
+
 No explanation.
 """
 
-entity = llm.invoke(prompt).strip()
+    entity = llm.invoke(prompt).strip()
 
-print("\nEntity Found :")
-print(entity)
+    print("\nEntity Found :")
+    print(entity)
 
-# ==========================================================
-# STEP 7 : SEARCH KNOWLEDGE GRAPH (NEO4J)
-# ==========================================================
 
-graph_query = """
+    # ==========================================================
+    # STEP 7 : GRAPH SEARCH
+    # ==========================================================
+
+    graph_query = """
 MATCH (a)-[r]->(b)
-WHERE toLower(a.name) = toLower($entity)
-   OR toLower(b.name) = toLower($entity)
+WHERE toLower(a.name)=toLower($entity)
+   OR toLower(b.name)=toLower($entity)
 
 RETURN
 a.name AS source,
@@ -96,87 +110,86 @@ type(r) AS relationship,
 b.name AS target
 """
 
-graph_context = ""
+    graph_context = ""
 
-print("\n" + "=" * 50)
-print("GRAPH CONTEXT")
-print("=" * 50)
+    print("\n" + "=" * 50)
+    print("GRAPH CONTEXT")
+    print("=" * 50)
 
-with driver.session(database="gdb") as session:
+    with driver.session(database="gdb") as session:
 
-    result = session.run(
-        graph_query,
-        entity=entity
-    )
-
-    found = False
-
-    for record in result:
-
-        found = True
-
-        relation = (
-            f"{record['source']} "
-            f"--{record['relationship']}--> "
-            f"{record['target']}"
+        result = session.run(
+            graph_query,
+            entity=entity
         )
 
-        print(relation)
+        found = False
 
-        graph_context += relation + "\n"
+        for record in result:
 
-    if not found:
+            found = True
 
-        print("No Graph Information Found")
+            relation = (
+                f"{record['source']} "
+                f"--{record['relationship']}--> "
+                f"{record['target']}"
+            )
 
-# ==========================================================
-# STEP 8 : GENERATE QUESTION EMBEDDING
-# ==========================================================
+            print(relation)
 
-print("\nGenerating Question Embedding...")
+            graph_context += relation + "\n"
 
-question_embedding = embedding_model.encode(question)
+        if not found:
+            print("No Graph Information Found")
 
-print("Embedding Generated Successfully")
 
-# ==========================================================
-# STEP 9 : SEARCH CHROMADB
-# ==========================================================
+    # ==========================================================
+    # STEP 8 : GENERATE QUESTION EMBEDDING
+    # ==========================================================
 
-results = collection.query(
+    print("\nGenerating Question Embedding...")
 
-    query_embeddings=[
-        question_embedding.tolist()
-    ],
+    question_embedding = embedding_model.encode(question)
 
-    n_results=3
-)
+    print("Embedding Generated Successfully")
 
-# ==========================================================
-# STEP 10 : DISPLAY VECTOR CONTEXT
-# ==========================================================
 
-print("\n" + "=" * 50)
-print("VECTOR CONTEXT")
-print("=" * 50)
+    # ==========================================================
+    # STEP 9 : SEARCH CHROMADB
+    # ==========================================================
 
-vector_context = ""
+    results = collection.query(
+        query_embeddings=[question_embedding.tolist()],
+        n_results=3
+    )
 
-documents = results["documents"][0]
 
-for i, doc in enumerate(documents, start=1):
+    # ==========================================================
+    # STEP 10 : VECTOR SEARCH
+    # ==========================================================
 
-    print(f"\nChunk {i}")
-    print("-" * 30)
-    print(doc)
+    print("\n" + "=" * 50)
+    print("VECTOR CONTEXT")
+    print("=" * 50)
 
-    vector_context += doc + "\n\n"
+    vector_context = ""
 
-# ==========================================================
-# STEP 11 : COMBINE BOTH CONTEXTS
-# ==========================================================
+    documents = results["documents"][0]
 
-combined_context = f"""
+    for i, doc in enumerate(documents, start=1):
+
+        print(f"\nChunk {i}")
+        print("-" * 30)
+        print(doc)
+
+        vector_context += doc + "\n\n"
+
+
+    # ==========================================================
+    # STEP 11 : COMBINE CONTEXT
+    # ==========================================================
+
+    combined_context = f"""
 ================ GRAPH CONTEXT ================
 
 {graph_context}
@@ -186,16 +199,42 @@ combined_context = f"""
 {vector_context}
 """
 
-print("\n" + "=" * 50)
-print("COMBINED CONTEXT")
-print("=" * 50)
 
-print(combined_context)
+    print("\n" + "=" * 50)
+    print("COMBINED CONTEXT")
+    print("=" * 50)
+
+    print(combined_context)
+
+
+    # ==========================================================
+    # STEP 12 : CLOSE CONNECTION
+    # ==========================================================
+
+    driver.close()
+
+    print("\nNeo4j Connection Closed")
+
+
+    # ==========================================================
+    # RETURN EVERYTHING
+    # ==========================================================
+
+    return {
+        "question": question,
+        "entity": entity,
+        "graph_context": graph_context,
+        "vector_context": vector_context,
+        "combined_context": combined_context
+    }
+
 
 # ==========================================================
-# STEP 12 : CLOSE NEO4J CONNECTION
+# MAIN FUNCTION
 # ==========================================================
 
-driver.close()
+if __name__ == "__main__":
 
-print("\nNeo4j Connection Closed")
+    data = hybrid_search()
+
+    print("\nReturned Successfully")
