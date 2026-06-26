@@ -1,84 +1,98 @@
 # ==========================================================
-# IMPORT LIBRARIES
+# IMPORTS
 # ==========================================================
 
 from config import llm
-from hybrid_search import return_data
+from hybrid_search import hybrid_search
+
 
 # ==========================================================
-# LOAD GEMMA
+# ANSWER GENERATION FUNCTION
 # ==========================================================
 
-print("Loading Gemma...")
+def generate_answer():
 
-llm = OllamaLLM(model="gemma3")
+    # ==========================================================
+    # STEP 1 : RETRIEVE CONTEXT
+    # ==========================================================
 
-print("Gemma Loaded Successfully")
+    data = hybrid_search()
 
-# ==========================================================
-# GET DATA FROM HYBRID SEARCH
-# ==========================================================
+    question = data["question"]
+    graph_context = data["graph_context"]
+    vector_context = data["vector_context"]
 
-question = return_data["question"]
+    # ==========================================================
+    # STEP 2 : BUILD PROMPT
+    # ==========================================================
 
-graph_context = return_data["graph_context"]
+    prompt = f"""
+You are an expert AI assistant.
 
-vector_context = return_data["vector_context"]
+Your job is to answer the user's question by combining information from BOTH the Graph Context and the Vector Context.
 
-combined_context = return_data["combined_context"]
+Instructions:
 
-# ==========================================================
-# CREATE PROMPT
-# ==========================================================
-
-prompt = f"""
-You are an intelligent AI assistant.
-
-Answer the user's question ONLY using the information
-provided below.
-
-If the answer is not present in the context,
-reply exactly:
-
+1. Read the complete Graph Context.
+2. Read the complete Vector Context.
+3. Combine information from multiple pieces of context.
+4. Use graph relationships to improve your explanation.
+5. Use information from BOTH contexts whenever possible.
+6. Write the answer in your own words instead of copying sentences.
+7. If multiple facts are related, connect them logically.
+8. Give a detailed but concise explanation.
+9. If the answer cannot be found, reply exactly:
 "I couldn't find the answer in the provided documents."
 
-----------------------------------------
+--------------------------------------------------
 
 GRAPH CONTEXT
 
 {graph_context}
 
-----------------------------------------
+--------------------------------------------------
 
 VECTOR CONTEXT
 
 {vector_context}
 
-----------------------------------------
+--------------------------------------------------
 
 QUESTION
 
 {question}
 
-----------------------------------------
+--------------------------------------------------
 
-ANSWER
+FINAL ANSWER:
 """
 
+    # ==========================================================
+    # STEP 3 : GENERATE ANSWER
+    # ==========================================================
+
+    print("\nGenerating Answer...\n")
+
+    answer = llm.invoke(prompt)
+
+    # ==========================================================
+    # STEP 4 : RETURN ANSWER
+    # ==========================================================
+
+    return answer
+
+
 # ==========================================================
-# GENERATE ANSWER
+# MAIN
 # ==========================================================
 
-print("\nGenerating Answer...\n")
+if __name__ == "__main__":
 
-answer = llm.invoke(prompt)
+    answer = generate_answer()
 
-# ==========================================================
-# DISPLAY ANSWER
-# ==========================================================
+    print("\n")
+    print("=" * 60)
+    print("FINAL ANSWER")
+    print("=" * 60)
 
-print("=" * 60)
-print("FINAL ANSWER")
-print("=" * 60)
-
-print(answer)
+    print(answer)
