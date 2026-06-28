@@ -1,0 +1,11 @@
+chromadb
+jupyter
+langchain
+langchain-ollama
+langchain-text-splitters
+neo4j
+ollama
+sentence-transformers
+torch
+transformers
+ipykernel
