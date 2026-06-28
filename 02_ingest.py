@@ -111,9 +111,9 @@ print("\nStoring Data in ChromaDB...")
 for i, chunk in enumerate(chunks):
 
     collection.add(
-        ids=[f"chunk_{i}"],
+        ids=[f"chunk_{i}"],#helps in inserting values inside a string
         documents=[chunk],
-        embeddings=[embeddings[i].tolist()]
+        embeddings=[embeddings[i].tolist()]#since returned in array coverted into list while displaying
     )
 
 print("All Chunks Stored Successfully")
