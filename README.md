@@ -76,7 +76,6 @@ GRAPH-RAG/
 ├── 09_answer_generator.py             # Final answer generation using Gemma LLM
 │
 ├── .gitignore
-├── requirements.txt
 └── README.md
 ```
 
