@@ -45,29 +45,38 @@ The implementation is provided in a step-by-step Jupyter Notebook format with de
 # Project Structure
 
 ```text
-Hybrid-GraphRAG/
+GRAPH-RAG/
+│
+├── chroma_db/                         # Persistent ChromaDB vector database
 │
 ├── data/
 │   └── documents/
+│       └── sample.txt                 # Sample document used for indexing
+│
+├── notebook/
+│   └── KNOWLEDGE_GRAPH/
+│       ├── GraphRAG_Demo.ipynb                    # Complete GraphRAG implementation (step-by-step)
+│       ├── Knowledge_Graph.ipynb                 # Knowledge Graph basics
+│       ├── KNOWLEDGE_GRAPH_FOR_RAG.ipynb         # GraphRAG implementation
+│       ├── Knowledge_Graph_for_api_discovery.ipynb
+│       ├── Agentic_Knowledge_Graph_creation.ipynb
+│       ├── chroma_db/
 │       └── sample.txt
 │
-├── chroma_db/
+├── venv/                              # Python virtual environment
 │
-├── notebooks/
-│   ├── 01_Document_Loading.ipynb
-│   ├── 02_Text_Splitting.ipynb
-│   ├── 03_Embedding_Generation.ipynb
-│   ├── 04_ChromaDB_Storage.ipynb
-│   ├── 05_Vector_Search.ipynb
-│   ├── 06_Entity_Extraction.ipynb
-│   ├── 07_Entity_to_Graph.ipynb
-│   ├── 08_Relationship_Extraction.ipynb
-│   ├── 09_Graph_Search.ipynb
-│   ├── 10_Hybrid_Search.ipynb
-│   └── 11_Answer_Generation.ipynb
+├── 01_config.py                       # Configuration (LLM, Neo4j, ChromaDB, Embedding Model)
+├── 02_ingest.py                       # Document loading, chunking, embedding generation and ChromaDB storage
+├── 03_entity_extractor.py             # Entity extraction from documents
+├── 04_entity_to_graph.py              # Store extracted entities into Neo4j
+├── 05_graph_builder.py                # Extract relationships and build the Knowledge Graph
+├── 06_graph_search.py                 # Search entities and relationships using Cypher queries
+├── 07_search.py                       # Semantic vector search using ChromaDB
+├── 08_hybrid_search.py                # Hybrid retrieval (Knowledge Graph + Vector Search)
+├── 09_answer_generator.py             # Final answer generation using Gemma LLM
 │
+├── .gitignore
 ├── requirements.txt
-│
 └── README.md
 ```
 
