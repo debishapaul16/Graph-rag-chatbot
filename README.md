@@ -337,18 +337,6 @@ This project provides practical experience with:
 
 ---
 
-# Future Enhancements
-
-* Multi-document support
-* PDF ingestion
-* Automatic Named Entity Recognition (spaCy)
-* Graph visualization interface
-* Streamlit web application
-* FastAPI backend
-* Docker deployment
-* Conversation memory
-* Multi-hop graph reasoning
-* Source citation support
 
 
 
