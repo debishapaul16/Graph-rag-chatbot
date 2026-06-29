@@ -7,6 +7,7 @@ This project presents a complete implementation of a **Hybrid Graph Retrieval-Au
 The project demonstrates the complete GraphRAG pipeline, including document preprocessing, embedding generation, vector database storage, knowledge graph construction, graph querying, hybrid retrieval, and answer generation.
 
 The implementation is provided in a step-by-step Jupyter Notebook format with detailed explanations, making it suitable for both learning and practical implementation.
+## GOOGLE COLLAB LINK TO RUN THE FILE NAMED "GraphRAG_Demo.ipynb": https://colab.research.google.com/github/debishapaul16/Graph-rag-chatbot/blob/main/notebook/KNOWLEDGE_GRAPH/GraphRAG_Demo.ipynb
 
 ---
 
@@ -267,6 +268,9 @@ ollama run gemma3
 * Password
 
 ---
+
+# Configuration File:
+Though we have initialized a configuration file but still importing each module helped for running of each cell.
 
 # Running the Project
 
