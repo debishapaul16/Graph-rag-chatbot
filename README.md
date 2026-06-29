@@ -8,7 +8,8 @@ The project demonstrates the complete GraphRAG pipeline, including document prep
 
 The implementation is provided in a step-by-step Jupyter Notebook format with detailed explanations, making it suitable for both learning and practical implementation.
 ## GOOGLE COLLAB LINK TO RUN THE FILE NAMED "GraphRAG_Demo.ipynb": https://colab.research.google.com/github/debishapaul16/Graph-rag-chatbot/blob/main/notebook/KNOWLEDGE_GRAPH/GraphRAG_Demo.ipynb
-## Exact File Location--->notebook--->KNOWLEDGE_GRAPH--->GraphRAG_Demo.ipynb
+
+## Exact File Location: notebook-->KNOWLEDGE_GRAPH-->GraphRAG_Demo.ipynb
 
 ---
 
